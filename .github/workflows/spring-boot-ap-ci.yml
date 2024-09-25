@@ -2,19 +2,20 @@ name: Docker Image CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      # Step 1: Checkout code from the current repository
+      - name: Checkout current repository code
         uses: actions/checkout@v2
         
-      # Step 1: Check out to other repository
+      # Step 2: Check out to other repository
       - name: Checkout code from other repository
         uses: actions/checkout@v2
         with:
@@ -22,29 +23,29 @@ jobs:
           ref: main
           path: spring-boot-github-actions-demo
           
-      # Step 2: Install Java 17
+      # Step 3: Install Java 17
       - name: Set up JDK 17
         uses: actions/setup-java@v2
         with:
           java-version: '17'
           distribution: 'temurin'
 
-       # Step 3: Install Dcoker
+      # Step 4: Set up Docker Buildx
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      # Step 4: Build jar
+      # Step 5: Build jar
       - name: Build with Maven
         run: mvn clean package -DskipTests
 
-      # Step 5: Build Docker Image
+      # Step 6: Build Docker Image
       - name: Build Docker Image
-        run: docker build -t ${{ secrets.ACR_LOGIN_SERVER }}/my-azure-app:latest2 .
+        run: docker build -t ${{ secrets.ACR_LOGIN_SERVER }}/my-azure-app:latest .
 
-      # Step 6: Login to Azure Container Registry (ACR)
+      # Step 7: Login to Azure Container Registry (ACR)
       - name: Login to ACR
         run: echo ${{ secrets.ACR_PASSWORD }} | docker login ${{ secrets.ACR_LOGIN_SERVER }} -u ${{ secrets.ACR_USERNAME }} --password-stdin
 
-      # Step 7: Push Docker Image to ACR
+      # Step 8: Push Docker Image to ACR
       - name: Push Docker Image
-        run: docker push ${{ secrets.ACR_LOGIN_SERVER }}/my-azure-app:latest3
+        run: docker push ${{ secrets.ACR_LOGIN_SERVER }}/my-azure-app:latest
