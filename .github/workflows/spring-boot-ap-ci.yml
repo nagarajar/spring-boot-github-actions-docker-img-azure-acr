@@ -1,0 +1,50 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        
+      # Step 1: Check out to other repository
+      - name: Checkout code from other repository
+        uses: actions/checkout@v2
+        with:
+          repository: nagarajar/spring-boot-github-actions-demo
+          ref: main
+          path: spring-boot-github-actions-demo
+          
+      # Step 2: Install Java 17
+      - name: Set up JDK 17
+        uses: actions/setup-java@v2
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+       # Step 3: Install Dcoker
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      # Step 4: Build jar
+      - name: Build with Maven
+        run: mvn clean package -DskipTests
+
+      # Step 5: Build Docker Image
+      - name: Build Docker Image
+        run: docker build -t ${{ secrets.ACR_LOGIN_SERVER }}/my-azure-app:latest2 .
+
+      # Step 6: Login to Azure Container Registry (ACR)
+      - name: Login to ACR
+        run: echo ${{ secrets.ACR_PASSWORD }} | docker login ${{ secrets.ACR_LOGIN_SERVER }} -u ${{ secrets.ACR_USERNAME }} --password-stdin
+
+      # Step 7: Push Docker Image to ACR
+      - name: Push Docker Image
+        run: docker push ${{ secrets.ACR_LOGIN_SERVER }}/my-azure-app:latest3
