@@ -37,6 +37,7 @@ jobs:
       # Step 5: Build jar
       - name: Build with Maven
         run: mvn clean package -DskipTests
+        working-directory: spring-boot-github-actions-demo
 
       # Step 6: Build Docker Image
       - name: Build Docker Image
